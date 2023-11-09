@@ -1,24 +1,20 @@
 const state = {
-   puppies: []
+  puppies: []
 };
-
-
 
 const main = document.querySelector(`main`);
 
-const getPuppyDetails = (puppyIdentifier) => {
+
+
+const getPuppyDetails = async (puppyIdentifier) => {
 
   let individualPuppy = [];
-  //console.log(`this is puppyIdentifier `,puppyIdentifier)
 
   for (i = 0; i < state.puppies.length; i++) {
-    //console.log(state.puppies[i].id);
     if (puppyIdentifier == state.puppies[i].id) {
-      individualPuppy =state.puppies[i];
+      individualPuppy = state.puppies[i];
     };
   };
-  //console.log(individualPuppy);
-  //console.log(`puppy name is: `, individualPuppy.name);
 
 
   // ******  create individual puppy card
@@ -26,8 +22,6 @@ const getPuppyDetails = (puppyIdentifier) => {
   const puppyCard = document.createElement(`div`);
   puppyCard.setAttribute("style", "display: flex; justify-content: space-between; border-style: solid; border-color:black;height: 300px; width:500px; margin:10px;");
   main.appendChild(puppyCard);
-
-
 
   cardData = `
     <div style="align-self: center">
@@ -37,34 +31,27 @@ const getPuppyDetails = (puppyIdentifier) => {
     </div>
     <img id="image" src="${individualPuppy.imageUrl}" width=200px />
     `;
-   // <button type="button", id="backButton"> Back to Roster </button>
-
-
 
   puppyCard.innerHTML = cardData;
-  //const backButton = document.querySelector(`#backButton`);
-  //console.log(backButton);
-  const backButton=document.createElement(`button`);
-  backButton.textContent=`Return to Roster`;
+  const backButton = document.createElement(`button`);
+  backButton.textContent = `Return to Roster`;
   main.appendChild(backButton);
   backButton.addEventListener(`click`, () => {
-    //console.log(`button pushed`);
     getPuppyData();
   });
-
 }; // end of get puppy details
 
 
 
 const getPuppyData = async (event) => {
-  const puppyDataResponse = await fetch(`https://fsa-puppy-bowl.herokuapp.com/api/2310-fsa-et-web-ft-sf/players`);
-  //console.log(`this is the response to the fetch: ${puppyDataResponse}`);
-  const puppyDataJson = await puppyDataResponse.json();
-  //console.log(`this is puppyDataJSON should be in json format: `, puppyDataJson);
-  const puppyData = puppyDataJson.data.players;
-  //console.log(`this is puppyData after Json command and down to the players: `, puppyData);
-  state.puppies = puppyData.slice();
-  //console.log(`this is state.puppies after response: `, state.puppies);
+  try {
+    const puppyDataResponse = await fetch(`https://fsa-puppy-bowl.herokuapp.com/api/2310-fsa-et-web-ft-sf/players`);
+    const puppyDataJson = await puppyDataResponse.json();
+    const puppyData = puppyDataJson.data.players;
+    state.puppies = puppyData.slice();
+  } catch (err) {
+    console.log(`the database is unaccessible at this time`);
+  }
 
 
 
@@ -78,17 +65,14 @@ const getPuppyData = async (event) => {
 
     const rosterListDisplay = document.createElement(`ul`);
     main.appendChild(rosterListDisplay);
-    //console.log(`this is state.puppies just before li is created `,state.puppies)
 
     state.puppies.forEach(element => {
       const rosterListItems = document.createElement(`li`);
-      //console.log(element);
       rosterListItems.innerText = element.name;
       rosterListItems.setAttribute("id", element.id);
       rosterListDisplay.appendChild(rosterListItems);
     }); // end of list item creation
     const clickableListItmes = document.querySelectorAll(`li`);
-    //console.log (clickableListItmes);
     clickableListItmes.forEach((clickableListItem) => {
       clickableListItem.addEventListener(`click`, (event) => {
         //getPuppyDetails(event.target.innerText);
@@ -98,9 +82,59 @@ const getPuppyData = async (event) => {
     }); // end of clickablelistitems
   }; // end of rosterRender function
 
-rosterRender();
+  rosterRender();
 
 }; // end of get puppy data function
+
+
+// ***********form data here ****************
+
+
+const submitTheForm = async (event) => {
+
+  console.log(`form submitted`);
+  const newPuppyName = document.querySelector("#inputNewPuppyName").value;
+  const newPuppyBreed = document.querySelector("#inputNewPuppyBreed").value;
+  let newPuppyStatus = document.querySelector("#inputNewPuppyStatus").value;
+  if (newPuppyStatus == "field") {
+    newPuppyStatus = 1;
+  }else{
+    newPuppyStatus=0;
+  };
+  const newPuppyImage = document.querySelector("#inputNewPuppyImage").value;
+
+  try {
+    const response = await fetch('https://fsa-puppy-bowl.herokuapp.com/api/2310-fsa-et-web-ft-sf/players', {
+      
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: newPuppyName,
+          breed: newPuppyBreed,
+          //status: 'newPuppyStatus',
+          imageUrl: newPuppyImage,
+        }),
+      }
+    );
+    const result = await response.json();
+    console.log(result);
+  } catch (err) {
+    console.error(err);
+  }
+
+  getPuppyData();
+
+};
+
+
+const formSubmit = document.querySelector(`form`);
+
+formSubmit.addEventListener(`submit`, (event) => {
+  event.preventDefault();
+  submitTheForm();
+});
 
 getPuppyData();
 
