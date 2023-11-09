@@ -97,9 +97,9 @@ const submitTheForm = async (event) => {
   const newPuppyBreed = document.querySelector("#inputNewPuppyBreed").value;
   let newPuppyStatus = document.querySelector("#inputNewPuppyStatus").value;
   if (newPuppyStatus == "field") {
-    newPuppyStatus = 1;
+    newPuppyStatus = `field`;
   }else{
-    newPuppyStatus=0;
+    newPuppyStatus= `bench`;
   };
   const newPuppyImage = document.querySelector("#inputNewPuppyImage").value;
 
@@ -113,7 +113,7 @@ const submitTheForm = async (event) => {
         body: JSON.stringify({
           name: newPuppyName,
           breed: newPuppyBreed,
-          //status: 'newPuppyStatus',
+          status: newPuppyStatus,
           imageUrl: newPuppyImage,
         }),
       }
